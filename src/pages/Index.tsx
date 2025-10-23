@@ -30,6 +30,15 @@ interface Achievement {
   message: string;
 }
 
+interface Upgrade {
+  id: number;
+  name: string;
+  icon: string;
+  cost: number;
+  multiplier: number;
+  description: string;
+}
+
 const privileges: Privilege[] = [
   { id: 1, name: 'Бомж', icon: '🏚️', requirement: 0, color: 'text-gray-500' },
   { id: 2, name: 'Богач', icon: '💼', requirement: 50000, color: 'text-blue-400' },
@@ -54,6 +63,8 @@ const achievements: Achievement[] = [
 export default function Index() {
   const [balance, setBalance] = useState<number>(0);
   const [clickPower, setClickPower] = useState<number>(1);
+  const [clickMultiplier, setClickMultiplier] = useState<number>(1);
+  const [purchasedUpgrades, setPurchasedUpgrades] = useState<Set<number>>(new Set());
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [adminUserId, setAdminUserId] = useState<string>('');
   const [adminAmount, setAdminAmount] = useState<string>('');
@@ -91,7 +102,28 @@ export default function Index() {
 
   const handleClick = () => {
     const randomAmount = Math.floor(Math.random() * 5000) + 1;
-    setBalance((prev) => prev + randomAmount);
+    const totalAmount = randomAmount * clickMultiplier;
+    setBalance((prev) => prev + totalAmount);
+  };
+
+  const upgrades: Upgrade[] = [
+    { id: 1, name: 'Удвоитель', icon: '⚡', cost: 10000, multiplier: 2, description: 'Удваивает заработок' },
+    { id: 2, name: 'Турбо', icon: '🚀', cost: 50000, multiplier: 3, description: 'Утраивает заработок' },
+    { id: 3, name: 'Мега-буст', icon: '💎', cost: 250000, multiplier: 5, description: 'x5 к заработку' },
+    { id: 4, name: 'Ультра-сила', icon: '⭐', cost: 1000000, multiplier: 10, description: 'x10 к заработку' },
+    { id: 5, name: 'Божественный', icon: '👑', cost: 10000000, multiplier: 25, description: 'x25 к заработку' },
+  ];
+
+  const handleBuyUpgrade = (upgrade: Upgrade) => {
+    if (balance >= upgrade.cost && !purchasedUpgrades.has(upgrade.id)) {
+      setBalance((prev) => prev - upgrade.cost);
+      setClickMultiplier((prev) => prev * upgrade.multiplier);
+      setPurchasedUpgrades((prev) => new Set(prev).add(upgrade.id));
+      toast({
+        title: '✅ Улучшение куплено!',
+        description: `${upgrade.name}: ${upgrade.description}`,
+      });
+    }
   };
 
   const formatNumber = (num: number): string => {
@@ -266,6 +298,11 @@ export default function Index() {
             <div className="space-y-2">
               <h2 className="text-5xl font-bold gold-text">{formatNumber(balance)}</h2>
               <p className="text-gray-400">монет</p>
+              {clickMultiplier > 1 && (
+                <Badge className="bg-yellow-600/30 text-yellow-400 border-yellow-500/50">
+                  Множитель: x{clickMultiplier}
+                </Badge>
+              )}
             </div>
 
             {nextPrivilege && (
@@ -290,10 +327,14 @@ export default function Index() {
         </Card>
 
         <Tabs defaultValue="privileges" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-gray-900/50 border border-yellow-600/30">
+          <TabsList className="grid w-full grid-cols-3 bg-gray-900/50 border border-yellow-600/30">
             <TabsTrigger value="privileges" className="data-[state=active]:gold-gradient data-[state=active]:text-black">
               <Icon name="Award" size={18} className="mr-2" />
               Привилегии
+            </TabsTrigger>
+            <TabsTrigger value="upgrades" className="data-[state=active]:gold-gradient data-[state=active]:text-black">
+              <Icon name="Zap" size={18} className="mr-2" />
+              Улучшения
             </TabsTrigger>
             <TabsTrigger value="achievements" className="data-[state=active]:gold-gradient data-[state=active]:text-black">
               <Icon name="Trophy" size={18} className="mr-2" />
@@ -327,6 +368,52 @@ export default function Index() {
                     </div>
                     {isUnlocked && (
                       <Icon name="CheckCircle" size={24} className="text-yellow-500" />
+                    )}
+                  </div>
+                </Card>
+              );
+            })}
+          </TabsContent>
+
+          <TabsContent value="upgrades" className="space-y-3 mt-6">
+            {upgrades.map((upgrade) => {
+              const isPurchased = purchasedUpgrades.has(upgrade.id);
+              const canAfford = balance >= upgrade.cost;
+              return (
+                <Card
+                  key={upgrade.id}
+                  className={`p-4 border-2 transition-all ${
+                    isPurchased
+                      ? 'bg-gradient-to-r from-green-900/30 to-transparent border-green-600/50'
+                      : canAfford
+                      ? 'bg-gradient-to-r from-yellow-900/30 to-transparent border-yellow-600/50'
+                      : 'bg-gray-900/30 border-gray-700/30'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <span className="text-4xl">{upgrade.icon}</span>
+                      <div>
+                        <h3 className="text-xl font-bold text-yellow-400">
+                          {upgrade.name}
+                        </h3>
+                        <p className="text-sm text-gray-400">{upgrade.description}</p>
+                        <p className="text-sm text-yellow-500 font-semibold mt-1">
+                          {formatNumber(upgrade.cost)} монет
+                        </p>
+                      </div>
+                    </div>
+                    {isPurchased ? (
+                      <Icon name="CheckCircle" size={24} className="text-green-500" />
+                    ) : (
+                      <Button
+                        onClick={() => handleBuyUpgrade(upgrade)}
+                        disabled={!canAfford}
+                        size="sm"
+                        className={canAfford ? 'gold-gradient text-black font-semibold' : ''}
+                      >
+                        Купить
+                      </Button>
                     )}
                   </div>
                 </Card>
