@@ -87,7 +87,8 @@ export default function Index() {
   }, [balance, reachedAchievements, toast]);
 
   const handleClick = () => {
-    setBalance((prev) => prev + clickPower);
+    const randomAmount = Math.floor(Math.random() * 5000) + 1;
+    setBalance((prev) => prev + randomAmount);
   };
 
   const formatNumber = (num: number): string => {
@@ -228,7 +229,7 @@ export default function Index() {
               className="w-full h-20 text-2xl font-bold gold-gradient text-black hover:scale-105 transition-transform"
             >
               <Icon name="DollarSign" size={32} className="mr-2" />
-              Заработать +{clickPower}
+              Заработать 💰
             </Button>
           </div>
         </Card>
