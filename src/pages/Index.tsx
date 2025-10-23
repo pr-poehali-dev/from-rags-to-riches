@@ -48,6 +48,24 @@ interface PassiveUpgrade {
   description: string;
 }
 
+interface Car {
+  id: number;
+  name: string;
+  icon: string;
+  cost: number;
+  prestigeBonus: number;
+  description: string;
+}
+
+interface Business {
+  id: number;
+  name: string;
+  icon: string;
+  cost: number;
+  income: number;
+  description: string;
+}
+
 const privileges: Privilege[] = [
   { id: 1, name: 'Новичок', icon: '🎯', requirement: 0, color: 'text-gray-400' },
   { id: 2, name: 'Боец', icon: '⚔️', requirement: 50000, color: 'text-blue-400' },
@@ -75,6 +93,8 @@ export default function Index() {
   const [clickMultiplier, setClickMultiplier] = useState<number>(1);
   const [passiveIncome, setPassiveIncome] = useState<number>(0);
   const [purchasedUpgrades, setPurchasedUpgrades] = useState<Set<number>>(new Set());
+  const [purchasedCars, setPurchasedCars] = useState<Set<number>>(new Set());
+  const [purchasedBusinesses, setPurchasedBusinesses] = useState<Set<number>>(new Set());
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [adminUserId, setAdminUserId] = useState<string>('');
   const [adminAmount, setAdminAmount] = useState<string>('');
@@ -202,6 +222,27 @@ export default function Index() {
     { id: 105, name: 'Ядерная бомба', icon: '☢️', cost: 10000000, income: 100000, description: '+100K / 2 сек' },
   ];
 
+  const cars: Car[] = [
+    { id: 201, name: 'BMW M3', icon: '🏎️', cost: 500000, prestigeBonus: 5, description: 'Легенда дрифта' },
+    { id: 202, name: 'Gelandewagen', icon: '🚙', cost: 2000000, prestigeBonus: 10, description: 'Король бездорожья' },
+    { id: 203, name: 'Lamborghini', icon: '🏁', cost: 10000000, prestigeBonus: 25, description: 'Итальянский суперкар' },
+    { id: 204, name: 'Nissan GT-R', icon: '⚡', cost: 5000000, prestigeBonus: 15, description: 'Годзилла асфальта' },
+    { id: 205, name: 'Ferrari 458', icon: '🔥', cost: 15000000, prestigeBonus: 30, description: 'Красная молния' },
+    { id: 206, name: 'Porsche 911', icon: '💎', cost: 8000000, prestigeBonus: 20, description: 'Немецкая точность' },
+    { id: 207, name: 'McLaren P1', icon: '🚀', cost: 25000000, prestigeBonus: 50, description: 'Гибридный зверь' },
+    { id: 208, name: 'Bugatti Chiron', icon: '👑', cost: 50000000, prestigeBonus: 100, description: 'Король скорости' },
+  ];
+
+  const businesses: Business[] = [
+    { id: 301, name: 'Магазин 24/7', icon: '🏪', cost: 1000000, income: 5000, description: '+5K / 2 сек' },
+    { id: 302, name: 'Красное & Белое', icon: '🍷', cost: 5000000, income: 25000, description: '+25K / 2 сек' },
+    { id: 303, name: 'Манжетка', icon: '👔', cost: 10000000, income: 50000, description: '+50K / 2 сек' },
+    { id: 304, name: 'Автосалон', icon: '🚗', cost: 25000000, income: 150000, description: '+150K / 2 сек' },
+    { id: 305, name: 'Ночной клуб', icon: '🎵', cost: 50000000, income: 300000, description: '+300K / 2 сек' },
+    { id: 306, name: 'Казино', icon: '🎰', cost: 100000000, income: 750000, description: '+750K / 2 сек' },
+    { id: 307, name: 'Нефтяная вышка', icon: '⛽', cost: 500000000, income: 5000000, description: '+5M / 2 сек' },
+  ];
+
   const handleBuyUpgrade = (upgrade: Upgrade) => {
     if (balance >= upgrade.cost && !purchasedUpgrades.has(upgrade.id)) {
       setBalance((prev) => prev - upgrade.cost);
@@ -222,6 +263,29 @@ export default function Index() {
       toast({
         title: '✅ Улучшение куплено!',
         description: `${upgrade.name}: ${upgrade.description}`,
+      });
+    }
+  };
+
+  const handleBuyCar = (car: Car) => {
+    if (balance >= car.cost && !purchasedCars.has(car.id)) {
+      setBalance((prev) => prev - car.cost);
+      setPurchasedCars((prev) => new Set(prev).add(car.id));
+      toast({
+        title: '🏎️ Машина куплена!',
+        description: `${car.name} - Престиж +${car.prestigeBonus}%`,
+      });
+    }
+  };
+
+  const handleBuyBusiness = (business: Business) => {
+    if (balance >= business.cost && !purchasedBusinesses.has(business.id)) {
+      setBalance((prev) => prev - business.cost);
+      setPassiveIncome((prev) => prev + business.income);
+      setPurchasedBusinesses((prev) => new Set(prev).add(business.id));
+      toast({
+        title: '💼 Бизнес куплен!',
+        description: `${business.name}: ${business.description}`,
       });
     }
   };
@@ -398,21 +462,29 @@ export default function Index() {
         </Card>
 
         <Tabs defaultValue="privileges" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-gray-900/50 border border-cyan-600/30">
-            <TabsTrigger value="privileges" className="data-[state=active]:cyber-gradient data-[state=active]:text-black text-xs md:text-sm uppercase font-semibold">
-              <Icon name="Award" size={16} className="mr-1" />
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 bg-gray-900/50 border border-cyan-600/30 gap-1">
+            <TabsTrigger value="privileges" className="data-[state=active]:cyber-gradient data-[state=active]:text-black text-xs uppercase font-semibold">
+              <Icon name="Award" size={14} className="mr-1" />
               Ранги
             </TabsTrigger>
-            <TabsTrigger value="upgrades" className="data-[state=active]:cyber-gradient data-[state=active]:text-black text-xs md:text-sm uppercase font-semibold">
-              <Icon name="Zap" size={16} className="mr-1" />
+            <TabsTrigger value="upgrades" className="data-[state=active]:cyber-gradient data-[state=active]:text-black text-xs uppercase font-semibold">
+              <Icon name="Zap" size={14} className="mr-1" />
               Урон
             </TabsTrigger>
-            <TabsTrigger value="passive" className="data-[state=active]:cyber-gradient data-[state=active]:text-black text-xs md:text-sm uppercase font-semibold">
-              <Icon name="TrendingUp" size={16} className="mr-1" />
-              Авто
+            <TabsTrigger value="passive" className="data-[state=active]:cyber-gradient data-[state=active]:text-black text-xs uppercase font-semibold">
+              <Icon name="TrendingUp" size={14} className="mr-1" />
+              Оружие
             </TabsTrigger>
-            <TabsTrigger value="achievements" className="data-[state=active]:cyber-gradient data-[state=active]:text-black text-xs md:text-sm uppercase font-semibold">
-              <Icon name="Trophy" size={16} className="mr-1" />
+            <TabsTrigger value="cars" className="data-[state=active]:cyber-gradient data-[state=active]:text-black text-xs uppercase font-semibold">
+              <Icon name="Car" size={14} className="mr-1" />
+              Гараж
+            </TabsTrigger>
+            <TabsTrigger value="business" className="data-[state=active]:cyber-gradient data-[state=active]:text-black text-xs uppercase font-semibold">
+              <Icon name="Briefcase" size={14} className="mr-1" />
+              Бизнес
+            </TabsTrigger>
+            <TabsTrigger value="achievements" className="data-[state=active]:cyber-gradient data-[state=active]:text-black text-xs uppercase font-semibold">
+              <Icon name="Trophy" size={14} className="mr-1" />
               Награды
             </TabsTrigger>
           </TabsList>
@@ -529,6 +601,109 @@ export default function Index() {
                     ) : (
                       <Button
                         onClick={() => handleBuyPassiveUpgrade(upgrade)}
+                        disabled={!canAfford}
+                        size="sm"
+                        className={canAfford ? 'cyber-gradient text-black font-semibold uppercase' : 'uppercase'}
+                      >
+                        Купить
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              );
+            })}
+          </TabsContent>
+
+          <TabsContent value="cars" className="space-y-3 mt-6">
+            <div className="mb-4 p-4 tactical-card rounded-lg">
+              <h3 className="text-cyan-400 font-bold uppercase text-sm mb-2">🏎️ Автосалон премиум класса</h3>
+              <p className="text-gray-400 text-xs">Покупка машин повышает престиж, но не даёт дохода</p>
+            </div>
+            {cars.map((car) => {
+              const isPurchased = purchasedCars.has(car.id);
+              const canAfford = balance >= car.cost;
+              return (
+                <Card
+                  key={car.id}
+                  className={`p-4 border-2 transition-all ${
+                    isPurchased
+                      ? 'bg-gradient-to-r from-purple-900/30 to-transparent border-purple-600/50'
+                      : canAfford
+                      ? 'tactical-card'
+                      : 'bg-gray-900/30 border-gray-700/30'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <span className="text-4xl">{car.icon}</span>
+                      <div>
+                        <h3 className="text-xl font-bold text-purple-400 uppercase">
+                          {car.name}
+                        </h3>
+                        <p className="text-sm text-gray-400">{car.description}</p>
+                        <div className="flex gap-2 mt-1">
+                          <p className="text-sm text-cyan-400 font-semibold">
+                            {formatNumber(car.cost)} кредитов
+                          </p>
+                          <span className="text-purple-400 text-sm">• Престиж +{car.prestigeBonus}%</span>
+                        </div>
+                      </div>
+                    </div>
+                    {isPurchased ? (
+                      <Icon name="CheckCircle" size={24} className="text-purple-500" />
+                    ) : (
+                      <Button
+                        onClick={() => handleBuyCar(car)}
+                        disabled={!canAfford}
+                        size="sm"
+                        className={canAfford ? 'cyber-gradient text-black font-semibold uppercase' : 'uppercase'}
+                      >
+                        Купить
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              );
+            })}
+          </TabsContent>
+
+          <TabsContent value="business" className="space-y-3 mt-6">
+            <div className="mb-4 p-4 tactical-card rounded-lg">
+              <h3 className="text-cyan-400 font-bold uppercase text-sm mb-2">💼 Инвестиции в бизнес</h3>
+              <p className="text-gray-400 text-xs">Каждый бизнес приносит пассивный доход каждые 2 секунды</p>
+            </div>
+            {businesses.map((business) => {
+              const isPurchased = purchasedBusinesses.has(business.id);
+              const canAfford = balance >= business.cost;
+              return (
+                <Card
+                  key={business.id}
+                  className={`p-4 border-2 transition-all ${
+                    isPurchased
+                      ? 'bg-gradient-to-r from-green-900/30 to-transparent border-green-600/50'
+                      : canAfford
+                      ? 'tactical-card'
+                      : 'bg-gray-900/30 border-gray-700/30'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <span className="text-4xl">{business.icon}</span>
+                      <div>
+                        <h3 className="text-xl font-bold text-green-400 uppercase">
+                          {business.name}
+                        </h3>
+                        <p className="text-sm text-gray-400">{business.description}</p>
+                        <p className="text-sm text-cyan-400 font-semibold mt-1">
+                          {formatNumber(business.cost)} кредитов
+                        </p>
+                      </div>
+                    </div>
+                    {isPurchased ? (
+                      <Icon name="CheckCircle" size={24} className="text-green-500" />
+                    ) : (
+                      <Button
+                        onClick={() => handleBuyBusiness(business)}
                         disabled={!canAfford}
                         size="sm"
                         className={canAfford ? 'cyber-gradient text-black font-semibold uppercase' : 'uppercase'}
