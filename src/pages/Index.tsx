@@ -64,6 +64,7 @@ export default function Index() {
   const [balance, setBalance] = useState<number>(0);
   const [clickPower, setClickPower] = useState<number>(1);
   const [clickMultiplier, setClickMultiplier] = useState<number>(1);
+  const [passiveIncome, setPassiveIncome] = useState<number>(0);
   const [purchasedUpgrades, setPurchasedUpgrades] = useState<Set<number>>(new Set());
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [adminUserId, setAdminUserId] = useState<string>('');
@@ -73,6 +74,15 @@ export default function Index() {
   const [showAdminLogin, setShowAdminLogin] = useState<boolean>(true);
   const [reachedAchievements, setReachedAchievements] = useState<Set<number>>(new Set());
   const { toast } = useToast();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (passiveIncome > 0) {
+        setBalance((prev) => prev + passiveIncome);
+      }
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [passiveIncome]);
 
   const currentPrivilege = privileges
     .slice()
@@ -107,12 +117,41 @@ export default function Index() {
   };
 
   const upgrades: Upgrade[] = [
-    { id: 1, name: 'Удвоитель', icon: '⚡', cost: 10000, multiplier: 2, description: 'Удваивает заработок' },
-    { id: 2, name: 'Турбо', icon: '🚀', cost: 50000, multiplier: 3, description: 'Утраивает заработок' },
-    { id: 3, name: 'Мега-буст', icon: '💎', cost: 250000, multiplier: 5, description: 'x5 к заработку' },
-    { id: 4, name: 'Ультра-сила', icon: '⭐', cost: 1000000, multiplier: 10, description: 'x10 к заработку' },
-    { id: 5, name: 'Божественный', icon: '👑', cost: 10000000, multiplier: 25, description: 'x25 к заработку' },
+    { id: 1, name: 'Удвоитель', icon: '⚡', cost: 5000, multiplier: 2, description: 'Удваивает заработок' },
+    { id: 2, name: 'Турбо', icon: '🚀', cost: 25000, multiplier: 3, description: 'Утраивает заработок' },
+    { id: 3, name: 'Мега-буст', icon: '💎', cost: 100000, multiplier: 5, description: 'x5 к заработку' },
+    { id: 4, name: 'Ультра-сила', icon: '⭐', cost: 500000, multiplier: 10, description: 'x10 к заработку' },
+    { id: 5, name: 'Божественный', icon: '👑', cost: 5000000, multiplier: 25, description: 'x25 к заработку' },
   ];
+
+  interface PassiveUpgrade {
+    id: number;
+    name: string;
+    icon: string;
+    cost: number;
+    income: number;
+    description: string;
+  }
+
+  const passiveUpgrades: PassiveUpgrade[] = [
+    { id: 101, name: 'Автокликер', icon: '🤖', cost: 10000, income: 100, description: '+100 монет / 2 сек' },
+    { id: 102, name: 'Бизнес', icon: '💼', cost: 50000, income: 500, description: '+500 монет / 2 сек' },
+    { id: 103, name: 'Фабрика', icon: '🏭', cost: 250000, income: 2500, description: '+2.5K монет / 2 сек' },
+    { id: 104, name: 'Корпорация', icon: '🏢', cost: 1000000, income: 10000, description: '+10K монет / 2 сек' },
+    { id: 105, name: 'Империя', icon: '🌍', cost: 10000000, income: 100000, description: '+100K монет / 2 сек' },
+  ];
+
+  const handleBuyPassiveUpgrade = (upgrade: PassiveUpgrade) => {
+    if (balance >= upgrade.cost && !purchasedUpgrades.has(upgrade.id)) {
+      setBalance((prev) => prev - upgrade.cost);
+      setPassiveIncome((prev) => prev + upgrade.income);
+      setPurchasedUpgrades((prev) => new Set(prev).add(upgrade.id));
+      toast({
+        title: '✅ Улучшение куплено!',
+        description: `${upgrade.name}: ${upgrade.description}`,
+      });
+    }
+  };
 
   const handleBuyUpgrade = (upgrade: Upgrade) => {
     if (balance >= upgrade.cost && !purchasedUpgrades.has(upgrade.id)) {
@@ -298,11 +337,18 @@ export default function Index() {
             <div className="space-y-2">
               <h2 className="text-5xl font-bold gold-text">{formatNumber(balance)}</h2>
               <p className="text-gray-400">монет</p>
-              {clickMultiplier > 1 && (
-                <Badge className="bg-yellow-600/30 text-yellow-400 border-yellow-500/50">
-                  Множитель: x{clickMultiplier}
-                </Badge>
-              )}
+              <div className="flex flex-wrap gap-2 justify-center">
+                {clickMultiplier > 1 && (
+                  <Badge className="bg-yellow-600/30 text-yellow-400 border-yellow-500/50">
+                    Множитель: x{clickMultiplier}
+                  </Badge>
+                )}
+                {passiveIncome > 0 && (
+                  <Badge className="bg-green-600/30 text-green-400 border-green-500/50">
+                    +{formatNumber(passiveIncome)} / 2 сек
+                  </Badge>
+                )}
+              </div>
             </div>
 
             {nextPrivilege && (
@@ -327,18 +373,22 @@ export default function Index() {
         </Card>
 
         <Tabs defaultValue="privileges" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-gray-900/50 border border-yellow-600/30">
-            <TabsTrigger value="privileges" className="data-[state=active]:gold-gradient data-[state=active]:text-black">
-              <Icon name="Award" size={18} className="mr-2" />
+          <TabsList className="grid w-full grid-cols-4 bg-gray-900/50 border border-yellow-600/30">
+            <TabsTrigger value="privileges" className="data-[state=active]:gold-gradient data-[state=active]:text-black text-xs md:text-sm">
+              <Icon name="Award" size={16} className="mr-1" />
               Привилегии
             </TabsTrigger>
-            <TabsTrigger value="upgrades" className="data-[state=active]:gold-gradient data-[state=active]:text-black">
-              <Icon name="Zap" size={18} className="mr-2" />
-              Улучшения
+            <TabsTrigger value="upgrades" className="data-[state=active]:gold-gradient data-[state=active]:text-black text-xs md:text-sm">
+              <Icon name="Zap" size={16} className="mr-1" />
+              Клики
             </TabsTrigger>
-            <TabsTrigger value="achievements" className="data-[state=active]:gold-gradient data-[state=active]:text-black">
-              <Icon name="Trophy" size={18} className="mr-2" />
-              Достижения
+            <TabsTrigger value="passive" className="data-[state=active]:gold-gradient data-[state=active]:text-black text-xs md:text-sm">
+              <Icon name="TrendingUp" size={16} className="mr-1" />
+              Доход
+            </TabsTrigger>
+            <TabsTrigger value="achievements" className="data-[state=active]:gold-gradient data-[state=active]:text-black text-xs md:text-sm">
+              <Icon name="Trophy" size={16} className="mr-1" />
+              Награды
             </TabsTrigger>
           </TabsList>
 
@@ -408,6 +458,52 @@ export default function Index() {
                     ) : (
                       <Button
                         onClick={() => handleBuyUpgrade(upgrade)}
+                        disabled={!canAfford}
+                        size="sm"
+                        className={canAfford ? 'gold-gradient text-black font-semibold' : ''}
+                      >
+                        Купить
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              );
+            })}
+          </TabsContent>
+
+          <TabsContent value="passive" className="space-y-3 mt-6">
+            {passiveUpgrades.map((upgrade) => {
+              const isPurchased = purchasedUpgrades.has(upgrade.id);
+              const canAfford = balance >= upgrade.cost;
+              return (
+                <Card
+                  key={upgrade.id}
+                  className={`p-4 border-2 transition-all ${
+                    isPurchased
+                      ? 'bg-gradient-to-r from-green-900/30 to-transparent border-green-600/50'
+                      : canAfford
+                      ? 'bg-gradient-to-r from-yellow-900/30 to-transparent border-yellow-600/50'
+                      : 'bg-gray-900/30 border-gray-700/30'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <span className="text-4xl">{upgrade.icon}</span>
+                      <div>
+                        <h3 className="text-xl font-bold text-green-400">
+                          {upgrade.name}
+                        </h3>
+                        <p className="text-sm text-gray-400">{upgrade.description}</p>
+                        <p className="text-sm text-yellow-500 font-semibold mt-1">
+                          {formatNumber(upgrade.cost)} монет
+                        </p>
+                      </div>
+                    </div>
+                    {isPurchased ? (
+                      <Icon name="CheckCircle" size={24} className="text-green-500" />
+                    ) : (
+                      <Button
+                        onClick={() => handleBuyPassiveUpgrade(upgrade)}
                         disabled={!canAfford}
                         size="sm"
                         className={canAfford ? 'gold-gradient text-black font-semibold' : ''}
