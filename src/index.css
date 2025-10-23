@@ -6,44 +6,44 @@
 
 @layer base {
   :root {
-    --background: 0 0% 10%;
+    --background: 210 30% 8%;
     --foreground: 0 0% 100%;
 
-    --card: 0 0% 12%;
+    --card: 210 25% 12%;
     --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 12%;
+    --popover: 210 25% 12%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 45 100% 51%;
-    --primary-foreground: 0 0% 10%;
+    --primary: 195 100% 50%;
+    --primary-foreground: 210 30% 8%;
 
-    --secondary: 45 100% 41%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 30 100% 50%;
+    --secondary-foreground: 210 30% 8%;
 
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 70%;
+    --muted: 210 20% 18%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 45 100% 51%;
-    --accent-foreground: 0 0% 10%;
+    --accent: 195 100% 50%;
+    --accent-foreground: 210 30% 8%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 45 100% 51%;
+    --border: 210 20% 25%;
+    --input: 210 20% 18%;
+    --ring: 195 100% 50%;
 
-    --radius: 0.75rem;
+    --radius: 0.25rem;
 
-    --sidebar-background: 0 0% 8%;
+    --sidebar-background: 210 30% 8%;
     --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 45 100% 51%;
-    --sidebar-primary-foreground: 0 0% 10%;
-    --sidebar-accent: 0 0% 15%;
+    --sidebar-primary: 195 100% 50%;
+    --sidebar-primary-foreground: 210 30% 8%;
+    --sidebar-accent: 210 20% 18%;
     --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 45 100% 51%;
+    --sidebar-border: 210 20% 25%;
+    --sidebar-ring: 195 100% 50%;
   }
 }
 
@@ -55,6 +55,17 @@
   body {
     @apply bg-background text-foreground;
     font-family: "Roboto", sans-serif;
+    background-image:
+      radial-gradient(
+        circle at 20% 50%,
+        rgba(0, 217, 255, 0.05) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 80%,
+        rgba(255, 140, 0, 0.05) 0%,
+        transparent 50%
+      );
   }
 
   h1,
@@ -70,14 +81,26 @@
 
 @layer utilities {
   .gold-gradient {
-    background: linear-gradient(135deg, #d4af37 0%, #ffd700 50%, #d4af37 100%);
+    background: linear-gradient(135deg, #ff8c00 0%, #ffd700 50%, #ff8c00 100%);
+  }
+
+  .cyber-gradient {
+    background: linear-gradient(135deg, #00d9ff 0%, #0095ff 50%, #00d9ff 100%);
   }
 
   .gold-text {
-    background: linear-gradient(135deg, #d4af37 0%, #ffd700 50%, #d4af37 100%);
+    background: linear-gradient(135deg, #ff8c00 0%, #ffd700 50%, #ff8c00 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  .cyber-text {
+    background: linear-gradient(135deg, #00d9ff 0%, #0095ff 50%, #00d9ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
   }
 
   .shine-effect {
@@ -95,10 +118,26 @@
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.3),
+      rgba(0, 217, 255, 0.3),
       transparent
     );
     animation: shine 3s infinite;
+  }
+
+  .glow-border {
+    box-shadow:
+      0 0 20px rgba(0, 217, 255, 0.5),
+      inset 0 0 20px rgba(0, 217, 255, 0.1);
+  }
+
+  .tactical-card {
+    background: linear-gradient(
+      135deg,
+      rgba(0, 217, 255, 0.05) 0%,
+      rgba(0, 149, 255, 0.05) 100%
+    );
+    border: 2px solid rgba(0, 217, 255, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 217, 255, 0.2);
   }
 
   @keyframes shine {
@@ -108,5 +147,19 @@
     100% {
       left: 100%;
     }
+  }
+
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(0, 217, 255, 0.8);
+    }
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
   }
 }
