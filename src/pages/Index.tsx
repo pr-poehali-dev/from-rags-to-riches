@@ -57,6 +57,9 @@ export default function Index() {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [adminUserId, setAdminUserId] = useState<string>('');
   const [adminAmount, setAdminAmount] = useState<string>('');
+  const [adminLogin, setAdminLogin] = useState<string>('');
+  const [adminPassword, setAdminPassword] = useState<string>('');
+  const [showAdminLogin, setShowAdminLogin] = useState<boolean>(true);
   const [reachedAchievements, setReachedAchievements] = useState<Set<number>>(new Set());
   const { toast } = useToast();
 
@@ -124,6 +127,23 @@ export default function Index() {
     }
   };
 
+  const handleAdminLogin = () => {
+    if (adminLogin === 'KosmoCat' && adminPassword === 'KosmoCat') {
+      setIsAdmin(true);
+      setShowAdminLogin(false);
+      toast({
+        title: '✅ Вход выполнен',
+        description: 'Добро пожаловать, администратор!',
+      });
+    } else {
+      toast({
+        title: '❌ Ошибка входа',
+        description: 'Неверный логин или пароль',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#1A1A1A] relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-yellow-900/20 via-transparent to-yellow-600/10" />
@@ -150,48 +170,83 @@ export default function Index() {
               <DialogContent className="bg-card border-yellow-600/30">
                 <DialogHeader>
                   <DialogTitle className="gold-text">Админ-панель</DialogTitle>
-                  <DialogDescription>Управление монетами и привилегиями</DialogDescription>
+                  <DialogDescription>
+                    {showAdminLogin ? 'Введите данные для входа' : 'Управление монетами и привилегиями'}
+                  </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="userId">ID пользователя</Label>
-                    <Input
-                      id="userId"
-                      value={adminUserId}
-                      onChange={(e) => setAdminUserId(e.target.value)}
-                      placeholder="Введите ID"
-                      className="bg-background/50"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="amount">Количество монет</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      value={adminAmount}
-                      onChange={(e) => setAdminAmount(e.target.value)}
-                      placeholder="0"
-                      className="bg-background/50"
-                    />
-                  </div>
-                  <div className="flex gap-2">
+                {showAdminLogin ? (
+                  <div className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="adminLogin">Логин</Label>
+                      <Input
+                        id="adminLogin"
+                        value={adminLogin}
+                        onChange={(e) => setAdminLogin(e.target.value)}
+                        placeholder="Введите логин"
+                        className="bg-background/50"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="adminPassword">Пароль</Label>
+                      <Input
+                        id="adminPassword"
+                        type="password"
+                        value={adminPassword}
+                        onChange={(e) => setAdminPassword(e.target.value)}
+                        placeholder="Введите пароль"
+                        className="bg-background/50"
+                      />
+                    </div>
                     <Button
-                      onClick={handleAdminGive}
-                      className="flex-1 gold-gradient text-black font-semibold"
+                      onClick={handleAdminLogin}
+                      className="w-full gold-gradient text-black font-semibold"
                     >
-                      <Icon name="Plus" size={16} className="mr-2" />
-                      Выдать
-                    </Button>
-                    <Button
-                      onClick={handleAdminTake}
-                      variant="destructive"
-                      className="flex-1"
-                    >
-                      <Icon name="Minus" size={16} className="mr-2" />
-                      Забрать
+                      <Icon name="LogIn" size={16} className="mr-2" />
+                      Войти
                     </Button>
                   </div>
-                </div>
+                ) : (
+                  <div className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="userId">ID пользователя</Label>
+                      <Input
+                        id="userId"
+                        value={adminUserId}
+                        onChange={(e) => setAdminUserId(e.target.value)}
+                        placeholder="Введите ID"
+                        className="bg-background/50"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="amount">Количество монет</Label>
+                      <Input
+                        id="amount"
+                        type="number"
+                        value={adminAmount}
+                        onChange={(e) => setAdminAmount(e.target.value)}
+                        placeholder="0"
+                        className="bg-background/50"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleAdminGive}
+                        className="flex-1 gold-gradient text-black font-semibold"
+                      >
+                        <Icon name="Plus" size={16} className="mr-2" />
+                        Выдать
+                      </Button>
+                      <Button
+                        onClick={handleAdminTake}
+                        variant="destructive"
+                        className="flex-1"
+                      >
+                        <Icon name="Minus" size={16} className="mr-2" />
+                        Забрать
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </DialogContent>
             </Dialog>
           </div>
